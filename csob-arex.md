@@ -11,7 +11,7 @@ description: Projekt Avoka replacement a.k.a. "Hibernate som zakázal"
 Prepis online procesov implementovaných v technológii Avoka do nových technológií&#x20;
 
 * Povodná technológia: Avoka (Temenos)
-* Nové technológie: Java, Spring Boot, Camunda...
+* Nové technológie: Java, Spring Boot, Camunda 7
 
 Na prvý pohľad sa projekt veľmi podobal na FENX, akurát bol jeho uplným opakom.
 
@@ -27,10 +27,15 @@ Dodali sme
 
 * 🖥️ 8 FE appka (Angular)
 * ⚙️ 4 Mikroslužby / procesné aplikácie (Camunda BPMN) v Java
+  * Card issuance (vydanie debetnej karty a cestovné poistenie ku karte)
+  * Amendments (+ACQ)
+  * Loans origination (spotrebný úver a hypotéka)
+  * Account sales (zriadenie účtu pre fyzickú osobu / 1-osobovú firmu)
 
 ### Analýza
 
-* na rozdieľ od FENX, kde bolo výstupom analýzy programovanie v Confluence, tu bol výstup priamo Java kód&#x20;
+* na rozdieľ od FENX, kde bolo výstupom analýzy programovanie v Confluence, tu bol výstup priamo Java kód (model a doménová logika)
+* vývoj BE boli prevažne integrácie (podľa definovaného mappingu) a perzistencia
 
 ## Technológie
 
@@ -48,13 +53,19 @@ Dodali sme
 
 ### Deployment architecture
 
-Niekoľko osobitných typov prostredí / serverových clusterov (+ rozdelenie na <mark style="color:blue;">blue</mark>-<mark style="color:green;">green</mark>)
+Interné prostredie: DevOps linka a prosterdie založené na Softec DevOps frameworku a OpenShift-e 👍
 
+ČSOB prostredie: Niekoľko osobitných typov prostredí / serverových clusterov (+ rozdelenie na <mark style="color:blue;">blue</mark>-<mark style="color:green;">green</mark>)
+
+* FE
+  * SPA
+  * SPA Public
+  * SPA BOF
 * BFF&#x20;
   * NOA - aplikácie pre public web (neautentifikovaných zákazníkov)
   * EIDP - aplikácie pre autentifikovaných zákazníkov
   * AAD - aplikácie pre (autentifikovaných) agentov
-  * BOF - aplikácie pre back-office
+  * BOF - aplikácie pre back-office (Camunda worklist)
 * DBAPI - aplikácie s prístupom k databáze 😊
   * ostatné aplikácie mohli k databáze pristupovať len cez REST API vystavené cez tieto aplikácie 🤷‍♂️
 
@@ -84,4 +95,4 @@ Typická naša aplikácia bola&#x20;
 * mocky integrovaných systémov ako súčasť každej aplikácie
   * len špecifické služby, ktoré aplikácia volala&#x20;
   * používali sa ako pre JUnit testy, tak aj pri behu na našom prostredí - interné testy
-  * osobitný source root 💡
+  * osobitný source root `src/mock` 💡
