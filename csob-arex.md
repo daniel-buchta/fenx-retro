@@ -79,10 +79,11 @@ Typická naša aplikácia bola&#x20;
 
 ### Testy
 
-* E2E JUnit testy&#x20;
-  * komplexne testovali desiatky scenárov
-  * interakcia s aplikáciou v teste na úrovni jej REST API&#x20;
-  * integrované systémy sme simulovali mockmi na úrovni REST / SOAP API
+#### E2E JUnit testy&#x20;
+
+* komplexne testovali desiatky scenárov
+* interakcia s aplikáciou v teste na úrovni jej REST API&#x20;
+* integrované systémy sme simulovali mockmi na úrovni REST / SOAP API
 
 ```java
 @Test
@@ -101,8 +102,9 @@ void test14a_contract_signature_ready_to_sign_then_signed() {
 }
 ```
 
-* ArchUnit testy
-  * kontrola architektúry aplikácie (onion, layered, ...)
+#### ArchUnit testy
+
+* kontrola architektúry aplikácie (onion, layered, ...)
 
 ```java
 @ArchTest
@@ -125,6 +127,59 @@ static final ArchRule app_layers_are_respected = Architectures.layeredArchitectu
 static final ArchRule noCycles = SlicesRuleDefinition.slices()
         .matching("sk.csob.speed.frase.loans.(*)..")
         .should().beFreeOfCycles();
+```
+
+#### Persistence testy
+
+* Embedded PostgreSQL (Zonky)
+
+```xml
+<dependency>
+	<groupId>io.zonky.test</groupId>
+	<artifactId>embedded-postgres</artifactId>
+	<version>2.0.7</version>
+	<scope>test</scope>
+</dependency>
+
+<dependency>
+	<groupId>io.zonky.test</groupId>
+	<artifactId>embedded-database-spring-test</artifactId>
+	<version>2.5.1</version>
+	<scope>test</scope>
+</dependency>
+```
+
+```yaml
+zonky:
+  test:
+    database:
+      provider: zonky
+      type: postgres
+      refresh: before_each_test_method
+
+```
+
+```java
+@SpringBootTest
+@AutoConfigureEmbeddedDatabase // zonky
+class AmeOrderPersistenceTests {
+
+    @Autowired
+    private AmeOrderService ameOrderService;
+
+    @Test
+    @Transactional
+    void create_update_read_should_work() {
+        // test create
+        AmeOrder ameOrderToCreate = genOrderToCreate();
+        AmeOrder createdOrder = ameOrderService.writeAmeOrder(ameOrderToCreate);
+
+        // verify create returned something
+        assertThat(createdOrder).isNotNull();
+
+        ...
+    }
+}
 ```
 
 ### Aplikačná architektúra
