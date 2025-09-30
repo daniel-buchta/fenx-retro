@@ -84,8 +84,54 @@ Typická naša aplikácia bola&#x20;
   * interakcia s aplikáciou v teste na úrovni jej REST API&#x20;
   * integrované systémy sme simulovali mockmi na úrovni REST / SOAP API
 
+```java
+@Test
+void test14a_contract_signature_ready_to_sign_then_signed() {
+    ClientCtx ctx = initTestScenario(MockTestData.IPPID_CLO_SIG_CONTRACT_READY_TO_SIGN);
+
+    var cmd = flowToContractSignature(ctx);
+    assertEquals(CLOCustomerUiTask.SIGN_CONTRACT, cmd.getCmdType());
+
+    cmd = returnFromContractSignature(ctx, cmd.getApplicationId(), null);
+    assertEquals(CLOCustomerUiTask.THANK_YOU, cmd.getCmdType());
+    assertEquals(0, scenario.callCount(Interfaces.GENERATE_DOCUMENT));
+
+    cmd = returnFromContractSignature(ctx, cmd.getApplicationId(), null);
+    checkExpectedInfo(cmd,  LODTInfoScreen.OUTAGE);
+}
+```
+
+* ArchUnit testy
+  * kontrola architektúry aplikácie (onion, layered, ...)
+
+```java
+@ArchTest
+static final ArchRule app_layers_are_respected = Architectures.layeredArchitecture().consideringAllDependencies()
+        .layer("mocks").definedBy("..loans.mocks..")
+        .layer("shared").definedBy("..loans.shared..")
+        .layer("server").definedBy("..loans.server..")
+        .layer("logic").definedBy(
+                "..loans.lo..",
+                "..loans.clo..",
+                "..loans.mlo..",
+                "..loans.authenticateduser..")
+        .whereLayer("shared").mayOnlyBeAccessedByLayers("server", "logic")
+        .whereLayer("logic").mayOnlyBeAccessedByLayers("server")
+        .whereLayer("mocks").mayNotBeAccessedByAnyLayer()
+        .whereLayer("server").mayNotBeAccessedByAnyLayer();
+
+
+@ArchTest
+static final ArchRule noCycles = SlicesRuleDefinition.slices()
+        .matching("sk.csob.speed.frase.loans.(*)..")
+        .should().beFreeOfCycles();
+```
+
 ### Aplikačná architektúra
 
+* 2 typy aplikácii
+  * BFF -  clean architecture (onion / hexagonal)
+  * DBAPI - layered architecture
 * single-module projekty
   * v tomto prípade by malo zmysel aj multi-modul projekty, aby sme vedeli vyskladať finálne WAR-ká pre dané prostredie len s potrebnými triedami
 * onion / hexagonálna architektúra
@@ -96,3 +142,8 @@ Typická naša aplikácia bola&#x20;
   * len špecifické služby, ktoré aplikácia volala&#x20;
   * používali sa ako pre JUnit testy, tak aj pri behu na našom prostredí - interné testy
   * osobitný source root `src/mock` 💡
+
+
+
+<div><figure><img src=".gitbook/assets/loans.png" alt="Loans Origination BFF"><figcaption></figcaption></figure> <figure><img src=".gitbook/assets/ame-db (1).png" alt="Amendments DBAPI"><figcaption></figcaption></figure></div>
+
