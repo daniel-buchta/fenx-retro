@@ -69,7 +69,7 @@ Interné prostredie: DevOps linka a prosterdie založené na Softec DevOps frame
 * DBAPI - aplikácie s prístupom k databáze 😊
   * ostatné aplikácie mohli k databáze pristupovať len cez REST API vystavené cez tieto aplikácie 🤷‍♂️
 
-Typická naša aplikácia bola&#x20;
+Typická naša BE aplikácia bola&#x20;
 
 * rozdelená na 2 samostatne nasadzované aplikácie (BFF + DBAPI) 🤔
 * nasadzované do 3 prostredí EIDP + BOF + DBAPI 😮
@@ -202,3 +202,8 @@ class AmeOrderPersistenceTests {
 
 <div><figure><img src=".gitbook/assets/loans.png" alt="Loans Origination BFF"><figcaption></figcaption></figure> <figure><img src=".gitbook/assets/ame-db (1).png" alt="Amendments DBAPI"><figcaption></figcaption></figure></div>
 
+### Perzistencia
+
+* JDBC namiesto Hibernate 👎
+* Flyway 👍
+  * osobitné migrácie pre jednotlivé agregáty 👍
